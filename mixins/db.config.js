@@ -22,9 +22,9 @@ module.exports = {
   },
   mysql: {
     user: process.env.PGSQL_DB_USER || 'root',
-    password: process.env.PGSQL_DB_PASSWORD || 'root',
+    password: process.env.PGSQL_DB_PASSWORD || '',
     database: process.env.PGSQL_DB_NAME || 'spark',
-    host: process.env.PGSQL_DB_HOST || 'localhost',
+    host: process.env.PGSQL_DB_HOST || '127.0.0.1',
     // port: process.env.PGSQL_DB_PORT || 5432,
   },
   roles: {

@@ -74,7 +74,7 @@ module.exports = {
                     const blockedUsers = ctx.params.blockedUsers || null;
                     const totalFriends = ctx.params.totalFriends || null;
                     const status = ctx.params.status || '1';
-                    const activityCategories = ctx.params.user_preference.activityCategories;
+                    const activityCategories = '['+ctx.params.user_preference.activityCategories+']';
                     const country = ctx.params.country;
 
                     const hash = await bcrypt.hash(password,10);

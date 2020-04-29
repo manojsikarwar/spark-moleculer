@@ -172,7 +172,7 @@ module.exports = {
 
         activityCategoryList: {
             rest: {
-				method: "POST",
+				method: "GET",
 				path: "/activityCategoryList"
             },
             async handler(ctx) {
@@ -189,7 +189,7 @@ module.exports = {
                             const list = {
                                 id:key.id,
                                 name:key.name,
-                                images:key.images
+                                images:JSON.parse(key.images)
                             }
                             List.push(list);
                         }
