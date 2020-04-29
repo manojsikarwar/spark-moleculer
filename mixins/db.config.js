@@ -52,6 +52,7 @@ module.exports = {
     RESETPASSWORDNOT: ({success:true, statuCode:200, message:"Password not changed"}),
     SOMETHINGWRONG :({success:false, statuCode:409, message:"Something went wrong"}),
     PERMISSIONDENIDE :({success:false, statuCode:409, message:"Permission denide"}),
+    MISSINGFIELD :({success:false, statuCode:408, message:"Fields are missing"}),
 
     //========================= TOKEN MESSAGE =========================
 

@@ -57,54 +57,57 @@ module.exports = {
                         return process.message.UNAUTHORIZED;
                     }
                     if(Auth.role == 1){
-                        const password = '123456';
-                        const merchantName = ctx.params.merchantName;
-                        const merchantLogo = ctx.params.merchantLogo;
-                        const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
-                        const merchantWebsite = ctx.params.merchantWebsite;
-                        const contactPersonForSparks = ctx.params.contactPersonForSparks || null;
-                        const contactEmail = ctx.params.contactEmail || null;
-                        const mobileForSparks = JSON.stringify(ctx.params.mobileForSparks) || null;
-                        const notes = ctx.params.notes || null;
-                        const status = 1;
-                        const bank = ctx.params.bank || null;
-                        const connect_id = ctx.params.connect_id || null;
-                        const stripeMerchantId = ctx.params.stripeMerchantId || null;
-                        const createdBy = 1;
-                        const updatedBy = 1;
-                        const hash = await bcrypt.hash(password,10);
-                        const checkMerchant = `select * from merchants where merchantName = '${merchantName}' and merchantSignUpEmail = '${merchantSignUpEmail}'`;
-                        const [checkMerchantress] = await this.adapter.db.query(checkMerchant)
-                        if(checkMerchantress != ''){
-                            return process.message.UNIQMERCHANT;
-                        }else{
-                            const saveMerchant = `insert into merchants(merchantName,merchantLogo,merchantSignUpEmail,password,merchantWebsite,contactPersonForSparks,contactEmail,mobileForSparks,notes,status,bank,connect_id,stripeMerchantId,createdBy,updatedBy) values('${merchantName}','${merchantLogo}','${merchantSignUpEmail}','${hash}','${merchantWebsite}','${contactPersonForSparks}','${contactEmail}','${mobileForSparks}','${notes}','${status}','${bank}','${connect_id}','${stripeMerchantId}','${createdBy}','${updatedBy}')`;
-                            const [saveMerchantress] = await this.adapter.db.query(saveMerchant);
-    
-                            const data = {
-                                id : saveMerchant,
-                                merchantName : ctx.params.merchantName,
-                                merchantLogo: ctx.params.merchantLogo,
-                                merchantSignUpEmail: ctx.params.merchantSignUpEmail,
-                                merchantWebsite: ctx.params.merchantWebsite,
-                                contactPersonForSparks: ctx.params.contactPersonForSparks,
-                                contactEmail: ctx.params.contactEmail,
-                                mobileForSparks: ctx.params.mobileForSparks,
-                                notes: ctx.params.notes,
-                                bank: ctx.params.bank,
-                                connect_id: ctx.params.connect_id,
-                                stripeMerchantId:ctx.params.stripeMerchantId,
+                        // if(merchantName != '' && merchantLogo != ''  && merchantSignUpEmail != ''  && merchantWebsite != ''  && contactPersonForSparks != ''  && contactEmail != '' && notes != ''){
+                            const password = '123456';
+                            const merchantName = ctx.params.merchantName;
+                            const merchantLogo = ctx.params.merchantLogo;
+                            const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
+                            const merchantWebsite = ctx.params.merchantWebsite;
+                            const contactPersonForSparks = ctx.params.contactPersonForSparks || null;
+                            const contactEmail = ctx.params.contactEmail || null;
+                            const mobileForSparks = JSON.stringify(ctx.params.mobileForSparks) || null;
+                            const notes = ctx.params.notes || null;
+                            const status = 1;
+                            const bank = ctx.params.bank || null;
+                            const connect_id = ctx.params.connect_id || null;
+                            const stripeMerchantId = ctx.params.stripeMerchantId || null;
+                            const createdBy = 1;
+                            const updatedBy = 1;
+                            const hash = await bcrypt.hash(password,10);
+                            const checkMerchant = `select * from merchants where merchantName = '${merchantName}' and merchantSignUpEmail = '${merchantSignUpEmail}'`;
+                            const [checkMerchantress] = await this.adapter.db.query(checkMerchant)
+                            if(checkMerchantress != ''){
+                                return process.message.UNIQMERCHANT;
+                            }else{
+                                const saveMerchant = `insert into merchants(merchantName,merchantLogo,merchantSignUpEmail,password,merchantWebsite,contactPersonForSparks,contactEmail,mobileForSparks,notes,status,bank,connect_id,stripeMerchantId,createdBy,updatedBy) values('${merchantName}','${merchantLogo}','${merchantSignUpEmail}','${hash}','${merchantWebsite}','${contactPersonForSparks}','${contactEmail}','${mobileForSparks}','${notes}','${status}','${bank}','${connect_id}','${stripeMerchantId}','${createdBy}','${updatedBy}')`;
+                                const [saveMerchantress] = await this.adapter.db.query(saveMerchant);
+        
+                                const data = {
+                                    id : saveMerchant,
+                                    merchantName : ctx.params.merchantName,
+                                    merchantLogo: ctx.params.merchantLogo,
+                                    merchantSignUpEmail: ctx.params.merchantSignUpEmail,
+                                    merchantWebsite: ctx.params.merchantWebsite,
+                                    contactPersonForSparks: ctx.params.contactPersonForSparks,
+                                    contactEmail: ctx.params.contactEmail,
+                                    mobileForSparks: ctx.params.mobileForSparks,
+                                    notes: ctx.params.notes,
+                                    bank: ctx.params.bank,
+                                    connect_id: ctx.params.connect_id,
+                                    stripeMerchantId:ctx.params.stripeMerchantId,
+                                }
+                                const successMessage = {
+                                    success:true,
+                                    statusCode:200,
+                                    data:data,
+                                    message:'Success'
+                                }
+                                return successMessage
                             }
-                            const successMessage = {
-                                success:true,
-                                statusCode:200,
-                                data:data,
-                                message:'Success'
-                            }
-                            return successMessage
-                        }
+                        // }else{
+                        //     return process.message.MISSINGFIELD;
+                        // }
                     }else{
-
                         return process.message.PERMISSIONDENIDE;
                     }
                 }catch(error){
@@ -205,7 +208,61 @@ module.exports = {
 			}
         },
 
+        profile: {
+            rest: {
+				method: "GET",
+				path: "/profile"
+            },
+            async handler(ctx,res,req) {
+                try{
+                    const Auth = ctx.meta.user;
+                    if(Auth != null){
+                        const merchantId = Auth.id;
+                        const findmerchant = `select * from merchants where id = '${merchantId}'`;
+                        const [findmerchantress] = await this.adapter.db.query(findmerchant);
+                        // return findmerchantress
+                        const merchantProfile = {
+                            id: findmerchantress[0].id,
+                            merchantName: findmerchantress[0].merchantName,
+                            merchantLogo: findmerchantress[0].merchantLogo,
+                            merchantSignUpEmail: findmerchantress[0].merchantSignUpEmail,
+                            merchantWebsite: findmerchantress[0].merchantWebsite,
+                            contactPersonForSparks: findmerchantress[0].contactPersonForSparks,
+                            contactEmail: findmerchantress[0].contactEmail,
+                            mobileForSparks: findmerchantress[0].mobileForSparks,
+                            notes: findmerchantress[0].notes,
+                            status: findmerchantress[0].status,
+                            connect_id: findmerchantress[0].connect_id,
+                            stripeMerchantId: findmerchantress[0].stripeMerchantId,
+                            createdBy: findmerchantress[0].createdBy,
+                            updatedBy: findmerchantress[0].updatedBy,
+                            createdAt:findmerchantress[0].createdAt,
+                            updatedAt:findmerchantress[0].updatedAt,
+                        }
+                            const successMessage = {
+                                success:true,
+                                statusCode:200,
+                                data:merchantProfile
+                            }
+                        if(findmerchantress == ''){
+                            return successMessage;
+                        }else {
+                            return successMessage;
+                        }
+                    }else{
+                        return process.message.UNAUTHORIZED;
+                    }
+                }catch(error){
+                    const errMessage = {
+                        success:false,
+                        statusCode:409,
+                        error:error.errors,
 
+                    }
+                    return errMessage;
+                }
+			}
+        },
         
         
     }
