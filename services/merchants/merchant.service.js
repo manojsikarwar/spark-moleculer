@@ -57,7 +57,7 @@ module.exports = {
                         return process.message.UNAUTHORIZED;
                     }
                     if(Auth.role == 1){
-                        // if(merchantName != '' && merchantLogo != ''  && merchantSignUpEmail != ''  && merchantWebsite != ''  && contactPersonForSparks != ''  && contactEmail != '' && notes != ''){
+                      
                             const password = '123456';
                             const merchantName = ctx.params.merchantName;
                             const merchantLogo = ctx.params.merchantLogo;
@@ -104,10 +104,7 @@ module.exports = {
                                 }
                                 return successMessage
                             }
-                        // }else{
-                        //     return process.message.MISSINGFIELD;
-                        // }
-                    }else{
+                  }else{
                         return process.message.PERMISSIONDENIDE;
                     }
                 }catch(error){
