@@ -52,51 +52,60 @@ module.exports = {
             },
             async handler(ctx) {
                 try{
-                    const password = '123456';
-                    const merchantName = ctx.params.merchantName;
-                    const merchantLogo = ctx.params.merchantLogo;
-                    const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
-                    const merchantWebsite = ctx.params.merchantWebsite;
-                    const contactPersonForSparks = ctx.params.contactPersonForSparks || null;
-                    const contactEmail = ctx.params.contactEmail || null;
-                    const mobileForSparks = JSON.stringify(ctx.params.mobileForSparks) || null;
-                    const notes = ctx.params.notes || null;
-                    const status = 1;
-                    const bank = ctx.params.bank || null;
-                    const connect_id = ctx.params.connect_id || null;
-                    const stripeMerchantId = ctx.params.stripeMerchantId || null;
-                    const createdBy = 1;
-                    const updatedBy = 1;
-                    const hash = await bcrypt.hash(password,10);
-                    const checkMerchant = `select * from merchants where merchantName = '${merchantName}' and merchantSignUpEmail = '${merchantSignUpEmail}'`;
-                    const [checkMerchantress] = await this.adapter.db.query(checkMerchant)
-                    if(checkMerchantress != ''){
-                        return process.message.UNIQMERCHANT;
+                    const Auth = ctx.meta.user;
+                    if(Auth == null){
+                        return process.message.UNAUTHORIZED;
+                    }
+                    if(Auth.role == 1){
+                        const password = '123456';
+                        const merchantName = ctx.params.merchantName;
+                        const merchantLogo = ctx.params.merchantLogo;
+                        const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
+                        const merchantWebsite = ctx.params.merchantWebsite;
+                        const contactPersonForSparks = ctx.params.contactPersonForSparks || null;
+                        const contactEmail = ctx.params.contactEmail || null;
+                        const mobileForSparks = JSON.stringify(ctx.params.mobileForSparks) || null;
+                        const notes = ctx.params.notes || null;
+                        const status = 1;
+                        const bank = ctx.params.bank || null;
+                        const connect_id = ctx.params.connect_id || null;
+                        const stripeMerchantId = ctx.params.stripeMerchantId || null;
+                        const createdBy = 1;
+                        const updatedBy = 1;
+                        const hash = await bcrypt.hash(password,10);
+                        const checkMerchant = `select * from merchants where merchantName = '${merchantName}' and merchantSignUpEmail = '${merchantSignUpEmail}'`;
+                        const [checkMerchantress] = await this.adapter.db.query(checkMerchant)
+                        if(checkMerchantress != ''){
+                            return process.message.UNIQMERCHANT;
+                        }else{
+                            const saveMerchant = `insert into merchants(merchantName,merchantLogo,merchantSignUpEmail,password,merchantWebsite,contactPersonForSparks,contactEmail,mobileForSparks,notes,status,bank,connect_id,stripeMerchantId,createdBy,updatedBy) values('${merchantName}','${merchantLogo}','${merchantSignUpEmail}','${hash}','${merchantWebsite}','${contactPersonForSparks}','${contactEmail}','${mobileForSparks}','${notes}','${status}','${bank}','${connect_id}','${stripeMerchantId}','${createdBy}','${updatedBy}')`;
+                            const [saveMerchantress] = await this.adapter.db.query(saveMerchant);
+    
+                            const data = {
+                                id : saveMerchant,
+                                merchantName : ctx.params.merchantName,
+                                merchantLogo: ctx.params.merchantLogo,
+                                merchantSignUpEmail: ctx.params.merchantSignUpEmail,
+                                merchantWebsite: ctx.params.merchantWebsite,
+                                contactPersonForSparks: ctx.params.contactPersonForSparks,
+                                contactEmail: ctx.params.contactEmail,
+                                mobileForSparks: ctx.params.mobileForSparks,
+                                notes: ctx.params.notes,
+                                bank: ctx.params.bank,
+                                connect_id: ctx.params.connect_id,
+                                stripeMerchantId:ctx.params.stripeMerchantId,
+                            }
+                            const successMessage = {
+                                success:true,
+                                statusCode:200,
+                                data:data,
+                                message:'Success'
+                            }
+                            return successMessage
+                        }
                     }else{
-                        const saveMerchant = `insert into merchants(merchantName,merchantLogo,merchantSignUpEmail,password,merchantWebsite,contactPersonForSparks,contactEmail,mobileForSparks,notes,status,bank,connect_id,stripeMerchantId,createdBy,updatedBy) values('${merchantName}','${merchantLogo}','${merchantSignUpEmail}','${hash}','${merchantWebsite}','${contactPersonForSparks}','${contactEmail}','${mobileForSparks}','${notes}','${status}','${bank}','${connect_id}','${stripeMerchantId}','${createdBy}','${updatedBy}')`;
-                        const [saveMerchantress] = await this.adapter.db.query(saveMerchant);
 
-                        const data = {
-                            id : saveMerchant,
-                            merchantName : ctx.params.merchantName,
-                            merchantLogo: ctx.params.merchantLogo,
-                            merchantSignUpEmail: ctx.params.merchantSignUpEmail,
-                            merchantWebsite: ctx.params.merchantWebsite,
-                            contactPersonForSparks: ctx.params.contactPersonForSparks,
-                            contactEmail: ctx.params.contactEmail,
-                            mobileForSparks: ctx.params.mobileForSparks,
-                            notes: ctx.params.notes,
-                            bank: ctx.params.bank,
-                            connect_id: ctx.params.connect_id,
-                            stripeMerchantId:ctx.params.stripeMerchantId,
-                        }
-                        const successMessage = {
-                            success:true,
-                            statusCode:200,
-                            data:data,
-                            message:'Success'
-                        }
-                        return successMessage
+                        return process.message.PERMISSIONDENIDE;
                     }
                 }catch(error){
                     const errMessage = {
@@ -117,7 +126,6 @@ module.exports = {
             },
             async handler(ctx) {
                 try{
-                    console.log(ctx.meta)
                     const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
                     const password = ctx.params.password;
                     const checkMerchant = `select * from merchants where merchantSignUpEmail = '${merchantSignUpEmail}'`;

@@ -51,6 +51,7 @@ module.exports = {
     RESETPASSWORD: ({success:true, statuCode:200, message:"Password change successfully"}),
     RESETPASSWORDNOT: ({success:true, statuCode:200, message:"Password not changed"}),
     SOMETHINGWRONG :({success:false, statuCode:409, message:"Something went wrong"}),
+    PERMISSIONDENIDE :({success:false, statuCode:409, message:"Permission denide"}),
 
     //========================= TOKEN MESSAGE =========================
 
