@@ -151,72 +151,203 @@ module.exports = {
             },
             async handler(ctx) {
                 try{
-                    const email = ctx.params.email;
-                    const password = ctx.params.password;
-                    const checkUser = `select * from users where email = '${email}'`;
-                    const [checkUserress] = await this.adapter.db.query(checkUser);
-                    if(checkUserress != ''){
-                        const pwd = checkUserress[0].password;
-                        var matchResult = await bcrypt.compare(password,pwd);
-                        if(matchResult == true){
-                            const userId = checkUserress[0].id;
+                    const login_type      = ctx.params.login_type;
+                    const email           = ctx.params.email;
+                    const password        = ctx.params.password;
+                    const googleAuthToken = ctx.params.googleAuthToken;
+                    const fbAtuhToken     = ctx.params.fbAtuhToken;
 
-                            var token = jwt.sign({
-                                id: userId,
-                                email:checkUserress[0].email,
-                                status: checkUserress[0].status,
-                                role:role,
-                            }, 'secret', { expiresIn: '12h' });
-                            const userdata = {
-                                id: userId,
-                                firstName: checkUserress[0].firstName,
-                                lastName: checkUserress[0].lastName,
-                                email: checkUserress[0].email,
-                                gender: checkUserress[0].gender,
-                                profilePic: checkUserress[0].profilePic,
-                                mobileNo: checkUserress[0].mobileNo,
-                                dob: checkUserress[0].dob,
-                                coupleCode: checkUserress[0].coupleCode,
-                                status: checkUserress[0].status,
-                                createdAt:checkUserress[0].createdAt,
-                                updatedAt:checkUserress[0].updatedAt,
-                                user_preference: {
-                                    userId: userId,
-                                    token: token
+                    /** Login with Google **/
+                    if(login_type == 'google'){
+                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE googleId = '${googleAuthToken}'`;
+                        const [checkUserress] = await this.adapter.db.query(checkUser);
+                        console.log(checkUserress)
+                        if(checkUserress != ''){
+                                const userId = checkUserress[0].id;
+                                var token = jwt.sign({
+                                    id      : userId,
+                                    email   : checkUserress[0].email,
+                                    status  : checkUserress[0].status,
+                                    role    : role,
+                                }, 'secret', { expiresIn: '12h' });
+
+                                const userdata = {
+                                    id          : userId,
+                                    firstName   : checkUserress[0].firstName,
+                                    lastName    : checkUserress[0].lastName,
+                                    email       : checkUserress[0].email,
+                                    gender      : checkUserress[0].gender,
+                                    profilePic  : checkUserress[0].profilePic,
+                                    mobileNo    : checkUserress[0].mobileNo,
+                                    dob         : checkUserress[0].dob,
+                                    coupleCode  : checkUserress[0].coupleCode,
+                                    status      : checkUserress[0].status,
+                                    createdAt   : checkUserress[0].createdAt,
+                                    updatedAt   : checkUserress[0].updatedAt,
+                                    user_preference: {
+                                        userId : userId,
+                                        token  : token
+                                    }
                                 }
-                            }
-           
-                            const successMessage = {
-                                  success:true,
-                                  statusCode:200,
-                                  data:userdata,
-                                  message:'Success'
-                            }
-                            const checkToken  = `select * from authentications where user_id = '${userId}'`;
-                            const [checkTokenress] = await this.adapter.db.query(checkToken);
-                            if(checkTokenress != ''){
-                                const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
-                                const [updateTokenress] = await this.adapter.db.query(updateToken);
-                                if(updateTokenress.affectedRows >= 1){
+            
+                                const successMessage = {
+                                      success:true,
+                                      statusCode    : 200,
+                                      message       : 'Success',
+                                      data          : userdata,
+                                }
+                                const checkToken  = `select * from authentications where user_id = '${userId}'`;
+                                const [checkTokenress] = await this.adapter.db.query(checkToken);
+                                if(checkTokenress != ''){
+                                    const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
+                                    const [updateTokenress] = await this.adapter.db.query(updateToken);
+                                    if(updateTokenress.affectedRows >= 1){
+                                        return successMessage
+                                    }else{
+                                        return process.message.LOGINFAIL;
+                                    }
+                                }else {
+                                    const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
+                                    const [saveTokenress] = await this.adapter.db.query(saveToken);
+                                    if(saveTokenress){
+                                        return successMessage;
+                                    }else {
+                                        return process.message.LOGINFAIL;
+                                    }
+                                }
+                        }else {
+                            return process.message.USERNOTFOUND;
+                        }
+                    
+                        /** Login with Facebook **/
+                    }else if(login_type == 'fb'){
+                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE facebookId = '${fbAtuhToken}'`;
+                        const [checkUserress] = await this.adapter.db.query(checkUser);
+                        if(checkUserress != ''){
+                                const userId = checkUserress[0].id;
+                                var token = jwt.sign({
+                                    id: userId,
+                                    email:checkUserress[0].email,
+                                    status: checkUserress[0].status,
+                                    role:role,
+                                }, 'secret', { expiresIn: '12h' });
 
-                                    return successMessage
-                                }else{
-                                    return process.message.LOGINFAIL;
+                                const userdata = {
+                                    id          : userId,
+                                    firstName   : checkUserress[0].firstName,
+                                    lastName    : checkUserress[0].lastName,
+                                    email       : checkUserress[0].email,
+                                    gender      : checkUserress[0].gender,
+                                    profilePic  : checkUserress[0].profilePic,
+                                    mobileNo    : checkUserress[0].mobileNo,
+                                    dob         : checkUserress[0].dob,
+                                    coupleCode  : checkUserress[0].coupleCode,
+                                    status      : checkUserress[0].status,
+                                    createdAt   :checkUserress[0].createdAt,
+                                    updatedAt   :checkUserress[0].updatedAt,
+                                    user_preference: {
+                                        userId  : userId,
+                                        token   : token
+                                    }
+                                }
+            
+                                const successMessage = {
+                                      success    : true,
+                                      statusCode : 200,
+                                      message    : 'Success',
+                                      data       : userdata
+                                      
+                                }
+                                const checkToken  = `select * from authentications where user_id = '${userId}'`;
+                                const [checkTokenress] = await this.adapter.db.query(checkToken);
+                                if(checkTokenress != ''){
+                                    const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
+                                    const [updateTokenress] = await this.adapter.db.query(updateToken);
+                                    if(updateTokenress.affectedRows >= 1){
+                                        return successMessage
+                                    }else{
+                                        return process.message.LOGINFAIL;
+                                    }
+                                }else {
+                                    const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
+                                    const [saveTokenress] = await this.adapter.db.query(saveToken);
+                                    if(saveTokenress){
+                                        return successMessage;
+                                    }else {
+                                        return process.message.LOGINFAIL;
+                                    }
+                                }
+                        }else {
+                            return process.message.USERNOTFOUND;
+                        }
+
+                        /** Login With Email **/
+                    }else{
+                        const checkUser = `select * from users where email = '${email}'`;
+                        const [checkUserress] = await this.adapter.db.query(checkUser);
+                        if(checkUserress != ''){
+                            const pwd = checkUserress[0].password;
+                            var matchResult = await bcrypt.compare(password,pwd);
+                            if(matchResult == true){
+                                const userId = checkUserress[0].id;
+
+                                var token = jwt.sign({
+                                    id: userId,
+                                    email:checkUserress[0].email,
+                                    status: checkUserress[0].status,
+                                    role:role,
+                                }, 'secret', { expiresIn: '12h' });
+                                const userdata = {
+                                    id: userId,
+                                    firstName: checkUserress[0].firstName,
+                                    lastName: checkUserress[0].lastName,
+                                    email: checkUserress[0].email,
+                                    gender: checkUserress[0].gender,
+                                    profilePic: checkUserress[0].profilePic,
+                                    mobileNo: checkUserress[0].mobileNo,
+                                    dob: checkUserress[0].dob,
+                                    coupleCode: checkUserress[0].coupleCode,
+                                    status: checkUserress[0].status,
+                                    createdAt:checkUserress[0].createdAt,
+                                    updatedAt:checkUserress[0].updatedAt,
+                                    user_preference: {
+                                        userId: userId,
+                                        token: token
+                                    }
+                                }
+            
+                                const successMessage = {
+                                      success:true,
+                                      statusCode:200,
+                                      data:userdata,
+                                      message:'Success'
+                                }
+                                const checkToken  = `select * from authentications where user_id = '${userId}'`;
+                                const [checkTokenress] = await this.adapter.db.query(checkToken);
+                                if(checkTokenress != ''){
+                                    const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
+                                    const [updateTokenress] = await this.adapter.db.query(updateToken);
+                                    if(updateTokenress.affectedRows >= 1){
+
+                                        return successMessage
+                                    }else{
+                                        return process.message.LOGINFAIL;
+                                    }
+                                }else {
+                                    const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
+                                    const [saveTokenress] = await this.adapter.db.query(saveToken);
+                                    if(saveTokenress){
+                                        return successMessage;
+                                    }else {
+                                        return process.message.LOGINFAIL;
+                                    }
                                 }
                             }else {
-                                const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
-                                const [saveTokenress] = await this.adapter.db.query(saveToken);
-                                if(saveTokenress){
-                                    return successMessage;
-                                }else {
-                                    return process.message.LOGINFAIL;
-                                }
+                                return process.message.PASSWORDDUP;
                             }
                         }else {
-                            return process.message.PASSWORDDUP;
+                            return process.message.USERNOTFOUND;
                         }
-                    }else {
-                        return process.message.USERNOTFOUND;
                     }
                 }catch(error){
                     return error
