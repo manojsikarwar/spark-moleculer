@@ -60,7 +60,7 @@ module.exports = {
 			if (auth && auth.startsWith("Bearer")) {
 				const token = auth.slice(7);
 				if (token) {
-					return jwt.verify(token,'secret', (err, userData) => {  
+					return jwt.verify(token,'secretkey', (err, userData) => {  
 						if(err){
 							// console.log(err)
 							return Client.message.TOKENEXPIRE;

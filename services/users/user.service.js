@@ -166,7 +166,7 @@ module.exports = {
                                 email:checkUserress[0].email,
                                 status: checkUserress[0].status,
                                 role:role,
-                            }, 'secret', { expiresIn: '12h' });
+                            }, 'secretkey', { expiresIn: '12h' });
                             const userdata = {
                                 id: userId,
                                 firstName: checkUserress[0].firstName,

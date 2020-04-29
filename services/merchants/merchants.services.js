@@ -73,11 +73,30 @@ module.exports = {
                     if(checkMerchantress != ''){
                         return process.message.UNIQMERCHANT;
                     }else{
-                        const hash1 = await bcrypt.hash(password,10);
                         const saveMerchant = `insert into merchants(merchantName,merchantLogo,merchantSignUpEmail,password,merchantWebsite,contactPersonForSparks,contactEmail,mobileForSparks,notes,status,bank,connect_id,stripeMerchantId,createdBy,updatedBy) values('${merchantName}','${merchantLogo}','${merchantSignUpEmail}','${hash}','${merchantWebsite}','${contactPersonForSparks}','${contactEmail}','${mobileForSparks}','${notes}','${status}','${bank}','${connect_id}','${stripeMerchantId}','${createdBy}','${updatedBy}')`;
                         const [saveMerchantress] = await this.adapter.db.query(saveMerchant);
-                        
-                        return saveMerchantress
+
+                        const data = {
+                            id : saveMerchant,
+                            merchantName : ctx.params.merchantName,
+                            merchantLogo: ctx.params.merchantLogo,
+                            merchantSignUpEmail: ctx.params.merchantSignUpEmail,
+                            merchantWebsite: ctx.params.merchantWebsite,
+                            contactPersonForSparks: ctx.params.contactPersonForSparks,
+                            contactEmail: ctx.params.contactEmail,
+                            mobileForSparks: ctx.params.mobileForSparks,
+                            notes: ctx.params.notes,
+                            bank: ctx.params.bank,
+                            connect_id: ctx.params.connect_id,
+                            stripeMerchantId:ctx.params.stripeMerchantId,
+                        }
+                        const successMessage = {
+                            success:true,
+                            statusCode:200,
+                            data:data,
+                            message:'Success'
+                        }
+                        return successMessage
                     }
                 }catch(error){
                     const errMessage = {
@@ -98,6 +117,7 @@ module.exports = {
             },
             async handler(ctx) {
                 try{
+                    console.log(ctx.meta)
                     const merchantSignUpEmail = ctx.params.merchantSignUpEmail;
                     const password = ctx.params.password;
                     const checkMerchant = `select * from merchants where merchantSignUpEmail = '${merchantSignUpEmail}'`;
@@ -106,52 +126,52 @@ module.exports = {
                         const pwd = checkMerchantress[0].password;
                         var matchResult = await bcrypt.compare(password,pwd);
                         if(matchResult == true){
-                            const userId = checkMerchantress[0].id;
+                            const merchantID = checkMerchantress[0].id;
 
                             var token = jwt.sign({
-                                id: userId,
+                                id: merchantID,
                                 email:checkMerchantress[0].email,
                                 status: checkMerchantress[0].status,
                                 role:role,
-                            }, 'secret', { expiresIn: '12h' });
-                            const userdata = {
-                                id: userId,
-                                firstName: checkMerchantress[0].firstName,
-                                lastName: checkMerchantress[0].lastName,
-                                email: checkMerchantress[0].email,
-                                gender: checkMerchantress[0].gender,
-                                profilePic: checkMerchantress[0].profilePic,
-                                mobileNo: checkMerchantress[0].mobileNo,
-                                dob: checkMerchantress[0].dob,
-                                coupleCode: checkMerchantress[0].coupleCode,
+                            }, 'secretkey', { expiresIn: '12h' });
+                            const merchantdata = {
+                                id: merchantID,
+                                merchantName: checkMerchantress[0].merchantName,
+                                merchantLogo: checkMerchantress[0].merchantLogo,
+                                merchantSignUpEmail: checkMerchantress[0].merchantSignUpEmail,
+                                merchantWebsite: checkMerchantress[0].merchantWebsite,
+                                contactPersonForSparks: checkMerchantress[0].contactPersonForSparks,
+                                contactEmail: checkMerchantress[0].contactEmail,
+                                mobileForSparks: checkMerchantress[0].mobileForSparks,
+                                notes: checkMerchantress[0].notes,
                                 status: checkMerchantress[0].status,
+                                connect_id: checkMerchantress[0].connect_id,
+                                stripeMerchantId: checkMerchantress[0].stripeMerchantId,
+                                createdBy: checkMerchantress[0].createdBy,
+                                updatedBy: checkMerchantress[0].updatedBy,
                                 createdAt:checkMerchantress[0].createdAt,
                                 updatedAt:checkMerchantress[0].updatedAt,
-                                user_preference: {
-                                    userId: userId,
-                                    token: token
-                                }
+                                token: token
                             }
            
                             const successMessage = {
                                   success:true,
                                   statusCode:200,
-                                  data:userdata,
+                                  data:merchantdata,
                                   message:'Success'
                             }
-                            const checkToken  = `select * from authentications where user_id = '${userId}'`;
+                            const checkToken  = `select * from authentications where user_id = '${merchantID}' and type = '${'merchant'}'`;
                             const [checkTokenress] = await this.adapter.db.query(checkToken);
                             if(checkTokenress != ''){
-                                const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
+                                const updateToken = `update authentications set token = '${token}' where user_id = '${merchantID}'`
                                 const [updateTokenress] = await this.adapter.db.query(updateToken);
                                 if(updateTokenress.affectedRows >= 1){
-
                                     return successMessage
                                 }else{
                                     return process.message.LOGINFAIL;
                                 }
                             }else {
-                                const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
+                                const saveToken = `insert into authentications(type,user_id,token) values('${'merchant'}','${merchantID}','${token}')`
                                 const [saveTokenress] = await this.adapter.db.query(saveToken);
                                 if(saveTokenress){
                                     return successMessage;
