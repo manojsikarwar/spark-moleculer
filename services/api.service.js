@@ -3,15 +3,27 @@
 const ApiGateway = require("moleculer-web");
 const Client = require("../mixins/db.config");
 const jwt = require('jsonwebtoken');
+// var cors = require('cors')
+
 
 module.exports = {
 	name: "api",
 	mixins: [ApiGateway],
 
 	settings: {
+		// app.use(cors()),
 
 		port: process.env.PORT || Client.server.port,
 		ip: Client.server.host,
+
+		cors: {
+            origin: "*",
+            methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+            allowedHeaders: [],
+            exposedHeaders: [],
+            credentials: false,
+            maxAge: 3600
+        },
 
 		routes: [
 			{
@@ -19,6 +31,12 @@ module.exports = {
 				authorization: true,
 				authentication: true,
 				whitelist: ["**"],
+				 // Route CORS settings (overwrite global settings)
+				 cors: {
+                    origin: ["https://localhost:4000"],
+                    methods: ["GET", "OPTIONS", "POST","DELETE","PUT"],
+                    credentials: true
+                },
 
 				aliases: {
 
@@ -72,7 +90,7 @@ module.exports = {
 									email   : userData.email,
 									status  : userData.status,
 									role	: userData.role,
-									// token   : token,
+									token   : token,
 									exp     : userData.exp
 								}
 							}else{
