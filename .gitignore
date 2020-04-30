@@ -1,2 +1,6 @@
 node_modules/
+<<<<<<< HEAD
 mixins/db.config.js
+=======
+sparks.pem/
+>>>>>>> 0e06c9c90323ced9fa92b6e54b83b4e2ee737880

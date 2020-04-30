@@ -3,11 +3,12 @@ const DbService = require("moleculer-db");
 const SqlAdapter = require("moleculer-db-adapter-sequelize");
 const Sequelize = require("sequelize");
 const process = require('../../mixins/db.config');
+const message = require('../../lib/message');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
 const nodemailer = require("nodemailer");
-const role = process.roles.user;
+const role = message.roles.user;
 
 
 module.exports = {
@@ -136,7 +137,7 @@ module.exports = {
                             return successMessage;
                         }
                     }else {
-                        return process.message.USERDUPLICATE;
+                        return message.message.USERDUPLICATE;
                     }
                 }catch(error){
                     return error;
@@ -549,7 +550,7 @@ module.exports = {
                                 email:checkUserress[0].email,
                                 status: checkUserress[0].status,
                                 role:role,
-                            }, 'secret', { expiresIn: '12h' });
+                            }, 'secretkey', { expiresIn: '12h' });
                             const userdata = {
                                 id: userId,
                                 firstName: checkUserress[0].firstName,
@@ -584,7 +585,7 @@ module.exports = {
 
                                     return successMessage
                                 }else{
-                                    return process.message.LOGINFAIL;
+                                    return message.message.LOGINFAIL;
                                 }
                             }else {
                                 const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
@@ -592,14 +593,14 @@ module.exports = {
                                 if(saveTokenress){
                                     return successMessage;
                                 }else {
-                                    return process.message.LOGINFAIL;
+                                    return message.message.LOGINFAIL;
                                 }
                             }
                         }else {
-                            return process.message.PASSWORDDUP;
+                            return message.message.PASSWORDDUP;
                         }
                     }else {
-                        return process.message.USERNOTFOUND;
+                        return message.message.USERNOTFOUND;
                     }
                 }catch(error){
                     return error
@@ -631,7 +632,7 @@ module.exports = {
                             return successMessage;
                         }
                     }else{
-                        return process.message.UNAUTHORIZED;
+                        return message.message.UNAUTHORIZED;
                     }
                 }catch(error){
                     return error
@@ -688,7 +689,7 @@ module.exports = {
                     const findEmail = `select * from users where email = '${email}'`;
                     const [findEmailress] = await this.adapter.db.query(findEmail);
                     if(findEmailress == ''){
-                        return process.message.EMAILNOTFOUND;
+                        return message.message.EMAILNOTFOUND;
                     }else {
                         const token = uuid();
                         const firstName = findEmailress[0].firstName;
@@ -742,12 +743,12 @@ module.exports = {
                         const setPassword = `update users set password = '${hash}' where email = '${email}'`;
                         const [setPassress] = await this.adapter.db.query(setPassword);
                         if(setPassress.affectedRows >= 1){
-                            return process.message.RESETPASSWORD;
+                            return message.message.RESETPASSWORD;
                         }else{
                             return 
                         }
                     }else{
-                        return process.message.EMAILNOTFOUND;
+                        return message.message.EMAILNOTFOUND;
                     }
                 }catch(error){
                     return error
@@ -772,12 +773,12 @@ module.exports = {
                         const setPassword = `update users set password = '${hash}' where email = '${email}'`;
                         const [setPassress] = await this.adapter.db.query(setPassword);
                         if(setPassress.affectedRows >= 1){
-                            return process.message.RESETPASSWORD;
+                            return message.message.RESETPASSWORD;
                         }else{
                             return 
                         }
                     }else{
-                        return process.message.EMAILNOTFOUND;
+                        return message.message.EMAILNOTFOUND;
                     }
                 }catch(error){
                     return error

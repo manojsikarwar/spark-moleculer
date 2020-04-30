@@ -27,42 +27,6 @@ module.exports = {
     host: process.env.PGSQL_DB_HOST || '127.0.0.1',
     // port: process.env.PGSQL_DB_PORT || 5432,
   },
-  roles: {
-    user: 3,
-    merchant: 2,
-    admin: 1
-  },
-  message:{
-    ACTIVITYDELETE : ({success:true, statuCode:200, message:"Deleted successfully"}),
-    ACTIVITYCREATE : ({success:true, statuCode:200, message:"Activities create successfully"}),
 
 
-    NOTDELTE : ({success:false, statuCode:400, message:"Not deleted"}),
-
-    //========================= user message =========================
-
-    USERCREATE : ({success:true, statuCode:200, message:"User created"}),
-    USERDELETE : ({success:true, statuCode:200, message:"User deleted"}),
-    USERUPDATE : ({success:true, statuCode:200, message:"User updated"}),
-    USERDUPLICATE : ({success:true, statuCode:409, message:"User already exists"}),
-    USERNOTFOUND : ({success:false, statuCode:400, message:"Error: User does not exist."}),
-    PASSWORDDUP : ({success:false, statuCode:400, message:"Error: Password entered is incorrect."}),
-    LOGINFAIL : ({success:false, statuCode:401, message:"Error: Login failed."}),
-    RESETPASSWORD: ({success:true, statuCode:200, message:"Password change successfully"}),
-    RESETPASSWORDNOT: ({success:true, statuCode:200, message:"Password not changed"}),
-    SOMETHINGWRONG :({success:false, statuCode:409, message:"Something went wrong"}),
-
-    //========================= TOKEN MESSAGE =========================
-
-    UNAUTHORIZED : ({success:false, statuCode:401, message:"Token UnAuthorizedErr."}),
-    TOKENEXPIRE : ({success:false, statuCode:401, message:"Token Expire Please Login."}),
-
-    //========================= EMAIL MESSAGE ==========================
-
-    EMAILNOTFOUND : ({success:false, statuCode:401, message:"Email not found."}),
-
-    //========================= MERCHANT MESSAGE =======================
-
-    UNIQMERCHANT : ({success:false, statuCode:400, message:"merchantName must be unique."}),
-  }
 };
