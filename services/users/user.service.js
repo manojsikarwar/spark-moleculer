@@ -74,7 +74,7 @@ module.exports = {
                     const blockedUsers = ctx.params.blockedUsers || null;
                     const totalFriends = ctx.params.totalFriends || null;
                     const status = ctx.params.status || '1';
-                    const activityCategories = '['+ctx.params.user_preference.activityCategories+']';
+                    const activityCategories = ctx.params.user_preference.activityCategories;
                     const country = ctx.params.country;
 
                     const hash = await bcrypt.hash(password,10);
@@ -144,24 +144,41 @@ module.exports = {
 			}
         },
 
-        signin: {
+        Register: {
             rest: {
 				method: "POST",
-				path: "/signin"
+				path: "/Register"
             },
             async handler(ctx) {
                 try{
-                    const login_type      = ctx.params.login_type;
-                    const email           = ctx.params.email;
-                    const password        = ctx.params.password;
-                    const googleAuthToken = ctx.params.googleAuthToken;
-                    const fbAtuhToken     = ctx.params.fbAtuhToken;
+                    const firstName = ctx.params.firstName;
+                    const lastName = ctx.params.lastName;
+                    const email = ctx.params.email;
+                    const gender = ctx.params.gender;
+                    const profilePic = ctx.params.profilePic || null;
+                    const password = ctx.params.password;
+                    const mobileNo = ctx.params.mobileNo;
+                    const dob = ctx.params.dob;
+                    const stripeCustomerId = ctx.params.stripeCustomerId || null
+                    const emailVerificationCode = ctx.params.emailVerificationCode || null;
+                    const coupleCode = ctx.params.coupleCode || null;
+                    const resetPasswordCode = ctx.params.resetPasswordCode || null;
+                    const resetPasswordExpire = ctx.params.resetPasswordExpire || null;
+                    const referedBy = ctx.params.referedBy || '0';
+                    const privacy = ctx.params.privacy || '1';
+                    const blockedUsers = ctx.params.blockedUsers || null;
+                    const totalFriends = ctx.params.totalFriends || null;
+                    const status = ctx.params.status || '1';
+                    const activityCategories = ctx.params.user_preference.activityCategories;
+                    const country = ctx.params.country;
 
-                    /** Login with Google **/
-                    if(login_type == 'google'){
-                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE googleId = '${googleAuthToken}'`;
+                    const facebookId = ctx.params.facebookId;
+                    const googleId   = ctx.params.googleId;
+
+                    if(googleId != ''){
+                        /** Loign with google **/
+                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE googleId = '${googleId}'`;
                         const [checkUserress] = await this.adapter.db.query(checkUser);
-                        console.log(checkUserress)
                         if(checkUserress != ''){
                                 const userId = checkUserress[0].id;
                                 var token = jwt.sign({
@@ -191,10 +208,11 @@ module.exports = {
                                 }
             
                                 const successMessage = {
-                                      success:true,
-                                      statusCode    : 200,
-                                      message       : 'Success',
-                                      data          : userdata,
+                                    success:true,
+                                    statusCode    : 200,
+                                    message     : 'Success',
+                                    message     : 'Google login',
+                                    data          : userdata,
                                 }
                                 const checkToken  = `select * from authentications where user_id = '${userId}'`;
                                 const [checkTokenress] = await this.adapter.db.query(checkToken);
@@ -216,20 +234,114 @@ module.exports = {
                                     }
                                 }
                         }else {
-                            return process.message.USERNOTFOUND;
+                            // return process.message.USERNOTFOUND;
+                            const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE email = '${email}'`;
+                            const [checkUserress] = await this.adapter.db.query(checkUser);
+                            if(checkUserress != ''){
+                                // return checkUserress[0].email;
+
+                                    const userPreference = `UPDATE user_preferences SET googleId = '${googleId}' WHERE userId = '${checkUserress[0].userId}'`;
+                                    const [userPreferenceress] = await this.adapter.db.query(userPreference); 
+                                    if(userPreferenceress){
+                                        var token = jwt.sign({
+                                            id      : checkUserress[0].id,
+                                            email   :email,
+                                            status  : status,
+                                            role    : role
+                                        }, 'secret', { expiresIn: '12h' });
+                                
+                                        const userData = {
+                                            "id":checkUserress[0].id ,
+                                            "firstName": firstName,
+                                            "lastName":lastName,
+                                            "email": email,
+                                            "gender": gender,
+                                            "profilePic": profilePic,
+                                            "mobileNo": mobileNo,
+                                            "dob": dob,
+                                            "coupleCode": coupleCode,
+                                            "status": status,
+                                            "user_preference": {
+                                                "userId":checkUserress[0].id,
+                                                "token": token
+                                            }
+                                        }
+                                        const successMessage = {
+                                            success     :   true,
+                                            statusCode  :   200,
+                                            message     :   'Success',
+                                            logi        :   'update as Google',
+                                            data        :  userData,                      
+                                        }
+                                        return successMessage;
+                                    }
+
+                                    
+                            }else{
+                                // return 'checkUserress[0].email';
+
+                                const hash = await bcrypt.hash(password,10);
+                                const userCreate = `insert into users(firstName,lastName,email,gender,profilePic,password,mobileNo,dob,status) values('${firstName}','${lastName}','${email}','${gender}','${profilePic}','${hash}','${mobileNo}','${dob}','${status}')`;
+
+                                const [user] = await this.adapter.db.query(userCreate)
+                                if(user){
+                                    console.log(user)
+                                    
+                                    const userPreference = `insert into user_preferences(userId,googleId,activityCategories) values('${user}','${googleId}','${activityCategories}')`;
+                                    const [userPreferenceress] = await this.adapter.db.query(userPreference); 
+                                    var token = jwt.sign({
+                                        id: user,
+                                        email:email,
+                                        status: status,
+                                        role: role
+                                    }, 'secret', { expiresIn: '12h' });
+                                    const userData = {
+                                        "id":user ,
+                                        "firstName": firstName,
+                                        "lastName":lastName,
+                                        "email": email,
+                                        "gender": gender,
+                                        "profilePic": profilePic,
+                                        "mobileNo": mobileNo,
+                                        "dob": dob,
+                                        "coupleCode": coupleCode,
+                                        "status": status,
+                                        "user_preference": {
+                                            "userId": user,
+                                            "token": token
+                                        }
+                                    }
+                                    const successMessage = {
+                                        success:true,
+                                        statusCode:200,
+                                        message:'Success',
+                                        logi   :'Register as Google',
+                                        data:userData,                      
+                                    }
+                                    return successMessage;
+                                }else{
+                                    const successMessage = {
+                                        success:false,
+                                        status: 500,
+                                        message:'Not save'
+                                    }
+                                    return successMessage;
+                                }
+                            }
+                            
                         }
-                    
-                        /** Login with Facebook **/
-                    }else if(login_type == 'fb'){
-                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE facebookId = '${fbAtuhToken}'`;
+                        /** End **/
+                    }else if(facebookId != ''){
+                        /** Loign with facebook **/
+                        const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE facebookId = '${facebookId}'`;
                         const [checkUserress] = await this.adapter.db.query(checkUser);
                         if(checkUserress != ''){
                                 const userId = checkUserress[0].id;
                                 var token = jwt.sign({
-                                    id: userId,
-                                    email:checkUserress[0].email,
-                                    status: checkUserress[0].status,
-                                    role:role,
+                                    id      : userId,
+                                    email   : checkUserress[0].email,
+                                    status  : checkUserress[0].status,
+                                    role    : role,
                                 }, 'secret', { expiresIn: '12h' });
 
                                 const userdata = {
@@ -243,20 +355,20 @@ module.exports = {
                                     dob         : checkUserress[0].dob,
                                     coupleCode  : checkUserress[0].coupleCode,
                                     status      : checkUserress[0].status,
-                                    createdAt   :checkUserress[0].createdAt,
-                                    updatedAt   :checkUserress[0].updatedAt,
+                                    createdAt   : checkUserress[0].createdAt,
+                                    updatedAt   : checkUserress[0].updatedAt,
                                     user_preference: {
-                                        userId  : userId,
-                                        token   : token
+                                        userId : userId,
+                                        token  : token
                                     }
                                 }
             
                                 const successMessage = {
-                                      success    : true,
-                                      statusCode : 200,
-                                      message    : 'Success',
-                                      data       : userdata
-                                      
+                                    success:true,
+                                    statusCode    : 200,
+                                    message     : 'Success',
+                                    message     : 'Facebook login',
+                                    data          : userdata,
                                 }
                                 const checkToken  = `select * from authentications where user_id = '${userId}'`;
                                 const [checkTokenress] = await this.adapter.db.query(checkToken);
@@ -280,74 +392,214 @@ module.exports = {
                         }else {
                             return process.message.USERNOTFOUND;
                         }
-
-                        /** Login With Email **/
-                    }else{
-                        const checkUser = `select * from users where email = '${email}'`;
-                        const [checkUserress] = await this.adapter.db.query(checkUser);
-                        if(checkUserress != ''){
-                            const pwd = checkUserress[0].password;
-                            var matchResult = await bcrypt.compare(password,pwd);
-                            if(matchResult == true){
-                                const userId = checkUserress[0].id;
-
+                        /** End **/
+                    }else if(googleId == '' && facebookId == ''){
+                        const hash = await bcrypt.hash(password,10);
+                        const dupUser = `select * from users where email = '${email}'`;
+                        const [dupUserress] = await this.adapter.db.query(dupUser)
+                        if(dupUserress == ''){
+                            const userCreate = `insert into users(firstName,lastName,email,gender,profilePic,password,mobileNo,dob,stripeCustomerId,emailVerificationCode,coupleCode,resetPasswordCode,resetPasswordExpire,referedBy,privacy,blockedUsers,totalFriends,status) values('${firstName}','${lastName}','${email}','${gender}','${profilePic}','${hash}','${mobileNo}','${dob}','${stripeCustomerId}','${emailVerificationCode}','${coupleCode}','${resetPasswordCode}','${resetPasswordExpire}','${referedBy}','${privacy}','${blockedUsers}','${totalFriends}','${status}')`;
+                            const [user] = await this.adapter.db.query(userCreate)
+                            if(user){
+                                const accountPrivacy = ctx.params.accountPrivacy || null;
+                                const googleId = ctx.params.googleId || null;
+                                const facebookId = ctx.params.facebookId;
+                                const instagramId = ctx.params.instagramId || null;
+                                const twitterId = ctx.params.twitterId || null;
+                                const notificationSettings = ctx.params.notificationSettings || null;
+                                const exportCalendarType = ctx.params.exportCalendarType || null;
+                                const activityCategories1 = ctx.params.activityCategories || null
+                                const countryMode	 = ctx.params.countryMode	 || null;
+                                const favouriteActivities = ctx.params.favouriteActivities || null;
+                                const cards = ctx.params.cards || null;
+                                
+                                const userPreference = `insert into user_preferences(userId,accountPrivacy,googleId,facebookId,instagramId,twitterId,notificationSettings,exportCalendarType,activityCategories,countryMode,favouriteActivities,cards) values('${user}','${accountPrivacy}','${googleId}','${facebookId}','${instagramId}','${twitterId}','${notificationSettings}','${exportCalendarType}','${activityCategories}','${countryMode}','${favouriteActivities}','${cards}')`;
+                                const [userPreferenceress] = await this.adapter.db.query(userPreference); 
                                 var token = jwt.sign({
-                                    id: userId,
-                                    email:checkUserress[0].email,
-                                    status: checkUserress[0].status,
-                                    role:role,
+                                    id: user,
+                                    email:email,
+                                    status: status,
+                                    role: role
                                 }, 'secret', { expiresIn: '12h' });
-                                const userdata = {
-                                    id: userId,
-                                    firstName: checkUserress[0].firstName,
-                                    lastName: checkUserress[0].lastName,
-                                    email: checkUserress[0].email,
-                                    gender: checkUserress[0].gender,
-                                    profilePic: checkUserress[0].profilePic,
-                                    mobileNo: checkUserress[0].mobileNo,
-                                    dob: checkUserress[0].dob,
-                                    coupleCode: checkUserress[0].coupleCode,
-                                    status: checkUserress[0].status,
-                                    createdAt:checkUserress[0].createdAt,
-                                    updatedAt:checkUserress[0].updatedAt,
-                                    user_preference: {
-                                        userId: userId,
-                                        token: token
+                                const userData = {
+                                    "id":user ,
+                                    "firstName": firstName,
+                                    "lastName":lastName,
+                                    "email": email,
+                                    "gender": gender,
+                                    "profilePic": profilePic,
+                                    "mobileNo": mobileNo,
+                                    "dob": dob,
+                                    "coupleCode": coupleCode,
+                                    "status": status,
+                                    "user_preference": {
+                                        "userId": user,
+                                        "token": token
                                     }
                                 }
-            
                                 const successMessage = {
-                                      success:true,
-                                      statusCode:200,
-                                      data:userdata,
-                                      message:'Success'
+                                    success:true,
+                                    statusCode:200,
+                                    data:userData,
+                                    message:'Success'
                                 }
-                                const checkToken  = `select * from authentications where user_id = '${userId}'`;
-                                const [checkTokenress] = await this.adapter.db.query(checkToken);
-                                if(checkTokenress != ''){
-                                    const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
-                                    const [updateTokenress] = await this.adapter.db.query(updateToken);
-                                    if(updateTokenress.affectedRows >= 1){
-
-                                        return successMessage
-                                    }else{
-                                        return process.message.LOGINFAIL;
-                                    }
-                                }else {
-                                    const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
-                                    const [saveTokenress] = await this.adapter.db.query(saveToken);
-                                    if(saveTokenress){
-                                        return successMessage;
-                                    }else {
-                                        return process.message.LOGINFAIL;
-                                    }
+                                return successMessage;
+                            }else{
+                                const successMessage = {
+                                    success:false,
+                                    status: 500,
+                                    message:'Not save'
                                 }
-                            }else {
-                                return process.message.PASSWORDDUP;
+                                return successMessage;
                             }
                         }else {
-                            return process.message.USERNOTFOUND;
+                            return process.message.USERDUPLICATE;
                         }
+                    }else{
+
+                    }    
+
+                    // const hash = await bcrypt.hash(password,10);
+                    // const dupUser = `select * from users where email = '${email}'`;
+                    // const [dupUserress] = await this.adapter.db.query(dupUser)
+                    // if(dupUserress == ''){
+                    //     const userCreate = `insert into users(firstName,lastName,email,gender,profilePic,password,mobileNo,dob,stripeCustomerId,emailVerificationCode,coupleCode,resetPasswordCode,resetPasswordExpire,referedBy,privacy,blockedUsers,totalFriends,status) values('${firstName}','${lastName}','${email}','${gender}','${profilePic}','${hash}','${mobileNo}','${dob}','${stripeCustomerId}','${emailVerificationCode}','${coupleCode}','${resetPasswordCode}','${resetPasswordExpire}','${referedBy}','${privacy}','${blockedUsers}','${totalFriends}','${status}')`;
+                    //     const [user] = await this.adapter.db.query(userCreate)
+                    //     if(user){
+                    //         const accountPrivacy = ctx.params.accountPrivacy || null;
+                    //         const googleId = ctx.params.googleId || null;
+                    //         const facebookId = ctx.params.facebookId;
+                    //         const instagramId = ctx.params.instagramId || null;
+                    //         const twitterId = ctx.params.twitterId || null;
+                    //         const notificationSettings = ctx.params.notificationSettings || null;
+                    //         const exportCalendarType = ctx.params.exportCalendarType || null;
+                    //         const activityCategories1 = ctx.params.activityCategories || null
+                    //         const countryMode	 = ctx.params.countryMode	 || null;
+                    //         const favouriteActivities = ctx.params.favouriteActivities || null;
+                    //         const cards = ctx.params.cards || null;
+                            
+                    //         const userPreference = `insert into user_preferences(userId,accountPrivacy,googleId,facebookId,instagramId,twitterId,notificationSettings,exportCalendarType,activityCategories,countryMode,favouriteActivities,cards) values('${user}','${accountPrivacy}','${googleId}','${facebookId}','${instagramId}','${twitterId}','${notificationSettings}','${exportCalendarType}','${activityCategories}','${countryMode}','${favouriteActivities}','${cards}')`;
+                    //         const [userPreferenceress] = await this.adapter.db.query(userPreference); 
+                    //         var token = jwt.sign({
+                    //             id: user,
+                    //             email:email,
+                    //             status: status,
+                    //             role: role
+                    //         }, 'secret', { expiresIn: '12h' });
+                    //         const userData = {
+                    //             "id":user ,
+                    //             "firstName": firstName,
+                    //             "lastName":lastName,
+                    //             "email": email,
+                    //             "gender": gender,
+                    //             "profilePic": profilePic,
+                    //             "mobileNo": mobileNo,
+                    //             "dob": dob,
+                    //             "coupleCode": coupleCode,
+                    //             "status": status,
+                    //             "user_preference": {
+                    //                 "userId": user,
+                    //                 "token": token
+                    //             }
+                    //         }
+                    //         const successMessage = {
+                    //             success:true,
+                    //             statusCode:200,
+                    //             data:userData,
+                    //             message:'Success'
+                    //         }
+                    //         return successMessage;
+                    //     }else{
+                    //         const successMessage = {
+                    //             success:false,
+                    //             status: 500,
+                    //             message:'Not save'
+                    //         }
+                    //         return successMessage;
+                    //     }
+                    // }else {
+                    //     return process.message.USERDUPLICATE;
+                    // }
+                }catch(error){
+                    return error;
+                }
+			}
+        },
+
+
+        signin: {
+            rest: {
+				method: "POST",
+				path: "/signin"
+            },
+            async handler(ctx) {
+                try{
+                    const email = ctx.params.email;
+                    const password = ctx.params.password;
+                    const checkUser = `select * from users where email = '${email}'`;
+                    const [checkUserress] = await this.adapter.db.query(checkUser);
+                    if(checkUserress != ''){
+                        const pwd = checkUserress[0].password;
+                        var matchResult = await bcrypt.compare(password,pwd);
+                        if(matchResult == true){
+                            const userId = checkUserress[0].id;
+
+                            var token = jwt.sign({
+                                id: userId,
+                                email:checkUserress[0].email,
+                                status: checkUserress[0].status,
+                                role:role,
+                            }, 'secret', { expiresIn: '12h' });
+                            const userdata = {
+                                id: userId,
+                                firstName: checkUserress[0].firstName,
+                                lastName: checkUserress[0].lastName,
+                                email: checkUserress[0].email,
+                                gender: checkUserress[0].gender,
+                                profilePic: checkUserress[0].profilePic,
+                                mobileNo: checkUserress[0].mobileNo,
+                                dob: checkUserress[0].dob,
+                                coupleCode: checkUserress[0].coupleCode,
+                                status: checkUserress[0].status,
+                                createdAt:checkUserress[0].createdAt,
+                                updatedAt:checkUserress[0].updatedAt,
+                                user_preference: {
+                                    userId: userId,
+                                    token: token
+                                }
+                            }
+           
+                            const successMessage = {
+                                  success:true,
+                                  statusCode:200,
+                                  data:userdata,
+                                  message:'Success'
+                            }
+                            const checkToken  = `select * from authentications where user_id = '${userId}'`;
+                            const [checkTokenress] = await this.adapter.db.query(checkToken);
+                            if(checkTokenress != ''){
+                                const updateToken = `update authentications set token = '${token}' where user_id = '${userId}'`
+                                const [updateTokenress] = await this.adapter.db.query(updateToken);
+                                if(updateTokenress.affectedRows >= 1){
+
+                                    return successMessage
+                                }else{
+                                    return process.message.LOGINFAIL;
+                                }
+                            }else {
+                                const saveToken = `insert into authentications(type,user_id,token) values('${'user'}','${userId}','${token}')`
+                                const [saveTokenress] = await this.adapter.db.query(saveToken);
+                                if(saveTokenress){
+                                    return successMessage;
+                                }else {
+                                    return process.message.LOGINFAIL;
+                                }
+                            }
+                        }else {
+                            return process.message.PASSWORDDUP;
+                        }
+                    }else {
+                        return process.message.USERNOTFOUND;
                     }
                 }catch(error){
                     return error

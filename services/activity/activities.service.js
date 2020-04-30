@@ -178,10 +178,10 @@ module.exports = {
             async handler(ctx) {
                 // console.log(ctx.meta)
                 try{
-                    const Auth = ctx.meta.user
-                    if(Auth == null){
-                        return process.message.UNAUTHORIZED;
-                    }else{
+                    // const Auth = ctx.meta.user
+                    // if(Auth == null){
+                    //     return process.message.UNAUTHORIZED;
+                    // }else{
                         const List = [];
                         const sql = `select * from activity_categories`
                         const [searcActivityress] = await this.adapter.db.query(sql);
@@ -204,7 +204,7 @@ module.exports = {
                         }else{
                             return successMessage;
                         }
-                    }
+                    // }
                 }catch(error){
                     return error
                 }
