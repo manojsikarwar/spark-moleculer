@@ -2,12 +2,13 @@ const { ServiceBroker } = require("moleculer");
 const DbService = require("moleculer-db");
 const SqlAdapter = require("moleculer-db-adapter-sequelize");
 const Sequelize = require("sequelize");
+const message = require('../../lib/message');
 const process = require('../../mixins/db.config');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const { uuid } = require('uuidv4');
 const nodemailer = require("nodemailer");
-const role = process.roles.merchant;
+const role = message.roles.merchant;
 
 
 module.exports = {
@@ -54,7 +55,7 @@ module.exports = {
                 try{
                     const Auth = ctx.meta.user;
                     if(Auth == null){
-                        return process.message.UNAUTHORIZED;
+                        return message.message.UNAUTHORIZED;
                     }
                     if(Auth.role == 1){
                       
@@ -105,7 +106,7 @@ module.exports = {
                                 return successMessage
                             }
                   }else{
-                        return process.message.PERMISSIONDENIDE;
+                        return message.message.PERMISSIONDENIDE;
                     }
                 }catch(error){
                     const errMessage = {
@@ -176,7 +177,7 @@ module.exports = {
                                 if(updateTokenress.affectedRows >= 1){
                                     return successMessage
                                 }else{
-                                    return process.message.LOGINFAIL;
+                                    return message.message.LOGINFAIL;
                                 }
                             }else {
                                 const saveToken = `insert into authentications(type,user_id,token) values('${'merchant'}','${merchantID}','${token}')`
@@ -184,14 +185,14 @@ module.exports = {
                                 if(saveTokenress){
                                     return successMessage;
                                 }else {
-                                    return process.message.LOGINFAIL;
+                                    return message.message.LOGINFAIL;
                                 }
                             }
                         }else {
-                            return process.message.PASSWORDDUP;
+                            return message.message.PASSWORDDUP;
                         }
                     }else {
-                        return process.message.USERNOTFOUND;
+                        return message.message.USERNOTFOUND;
                     }
                 }catch(error){
                     const errMessage = {
@@ -247,7 +248,7 @@ module.exports = {
                             return successMessage;
                         }
                     }else{
-                        return process.message.UNAUTHORIZED;
+                        return message.message.UNAUTHORIZED;
                     }
                 }catch(error){
                     const errMessage = {

@@ -82,6 +82,10 @@ module.exports = {
 				path: "/create"
             },
             async handler(ctx) {
+                const Auth = ctx.meta.user;
+                if(Auth == null){
+                    return message.message.UNAUTHORIZED;
+                }
                 const title = ctx.params.title;
                 const description = ctx.params.description;
                 const images = JSON.stringify(ctx.params.images);
