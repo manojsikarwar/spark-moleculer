@@ -50,10 +50,10 @@ module.exports = {
 
     actions: {
 
-        signup: {
+        signupOld: {
             rest: {
 				method: "POST",
-				path: "/signup"
+				path: "/signupOld"
             },
             async handler(ctx) {
                 try{
@@ -145,10 +145,10 @@ module.exports = {
 			}
         },
 
-        Register: {
+        signup: {
             rest: {
 				method: "POST",
-				path: "/Register"
+				path: "/signup"
             },
             async handler(ctx) {
                 try{
@@ -170,7 +170,7 @@ module.exports = {
                     const blockedUsers = ctx.params.blockedUsers || null;
                     const totalFriends = ctx.params.totalFriends || null;
                     const status = ctx.params.status || '1';
-                    const activityCategories = ctx.params.user_preference.activityCategories;
+                    const activityCategories = '['+ctx.params.user_preference.activityCategories+']';
                     const country = ctx.params.country;
 
                     const facebookId = ctx.params.facebookId;
@@ -333,7 +333,7 @@ module.exports = {
                         }
                         /** End **/
                     }else if(facebookId != ''){
-                        /** Loign with facebook **/
+                        /** Loign with Facebook **/
                         const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE facebookId = '${facebookId}'`;
                         const [checkUserress] = await this.adapter.db.query(checkUser);
                         if(checkUserress != ''){
@@ -391,7 +391,101 @@ module.exports = {
                                     }
                                 }
                         }else {
-                            return process.message.USERNOTFOUND;
+                            // return process.message.USERNOTFOUND;
+                            const checkUser = `SELECT * FROM user_preferences as up JOIN users as u ON up.userId = u.id WHERE email = '${email}'`;
+                            const [checkUserress] = await this.adapter.db.query(checkUser);
+                            if(checkUserress != ''){
+                                // return checkUserress[0].email;
+
+                                    const userPreference = `UPDATE user_preferences SET facebookId = '${facebookId}' WHERE userId = '${checkUserress[0].userId}'`;
+                                    const [userPreferenceress] = await this.adapter.db.query(userPreference); 
+                                    if(userPreferenceress){
+                                        var token = jwt.sign({
+                                            id      : checkUserress[0].id,
+                                            email   :email,
+                                            status  : status,
+                                            role    : role
+                                        }, 'secret', { expiresIn: '12h' });
+                                
+                                        const userData = {
+                                            "id":checkUserress[0].id ,
+                                            "firstName": firstName,
+                                            "lastName":lastName,
+                                            "email": email,
+                                            "gender": gender,
+                                            "profilePic": profilePic,
+                                            "mobileNo": mobileNo,
+                                            "dob": dob,
+                                            "coupleCode": coupleCode,
+                                            "status": status,
+                                            "user_preference": {
+                                                "userId":checkUserress[0].id,
+                                                "token": token
+                                            }
+                                        }
+                                        const successMessage = {
+                                            success     :   true,
+                                            statusCode  :   200,
+                                            message     :   'Success',
+                                            logi        :   'update as facebook',
+                                            data        :  userData,                      
+                                        }
+                                        return successMessage;
+                                    }
+
+                                    
+                            }else{
+                                // return 'checkUserress[0].email';
+
+                                const hash = await bcrypt.hash(password,10);
+                                const userCreate = `insert into users(firstName,lastName,email,gender,profilePic,password,mobileNo,dob,status) values('${firstName}','${lastName}','${email}','${gender}','${profilePic}','${hash}','${mobileNo}','${dob}','${status}')`;
+
+                                const [user] = await this.adapter.db.query(userCreate)
+                                if(user){
+                                    console.log(user)
+                                    
+                                    const userPreference = `insert into user_preferences(userId,facebookId,activityCategories) values('${user}','${facebookId}','${activityCategories}')`;
+                                    const [userPreferenceress] = await this.adapter.db.query(userPreference); 
+                                    var token = jwt.sign({
+                                        id: user,
+                                        email:email,
+                                        status: status,
+                                        role: role
+                                    }, 'secret', { expiresIn: '12h' });
+                                    const userData = {
+                                        "id":user ,
+                                        "firstName": firstName,
+                                        "lastName":lastName,
+                                        "email": email,
+                                        "gender": gender,
+                                        "profilePic": profilePic,
+                                        "mobileNo": mobileNo,
+                                        "dob": dob,
+                                        "coupleCode": coupleCode,
+                                        "status": status,
+                                        "user_preference": {
+                                            "userId": user,
+                                            "token": token
+                                        }
+                                    }
+                                    const successMessage = {
+                                        success:true,
+                                        statusCode:200,
+                                        message:'Success',
+                                        logi   :'Register as Facebook',
+                                        data:userData,                      
+                                    }
+                                    return successMessage;
+                                }else{
+                                    const successMessage = {
+                                        success:false,
+                                        status: 500,
+                                        message:'Not save'
+                                    }
+                                    return successMessage;
+                                }
+                            }
+                            
                         }
                         /** End **/
                     }else if(googleId == '' && facebookId == ''){
@@ -457,70 +551,14 @@ module.exports = {
                             return process.message.USERDUPLICATE;
                         }
                     }else{
-
+                        const successMessage = {
+                            success:false,
+                            statusCode:500,
+                            message:'Something went wrong'
+                        }
+                        return successMessage;
                     }    
 
-                    // const hash = await bcrypt.hash(password,10);
-                    // const dupUser = `select * from users where email = '${email}'`;
-                    // const [dupUserress] = await this.adapter.db.query(dupUser)
-                    // if(dupUserress == ''){
-                    //     const userCreate = `insert into users(firstName,lastName,email,gender,profilePic,password,mobileNo,dob,stripeCustomerId,emailVerificationCode,coupleCode,resetPasswordCode,resetPasswordExpire,referedBy,privacy,blockedUsers,totalFriends,status) values('${firstName}','${lastName}','${email}','${gender}','${profilePic}','${hash}','${mobileNo}','${dob}','${stripeCustomerId}','${emailVerificationCode}','${coupleCode}','${resetPasswordCode}','${resetPasswordExpire}','${referedBy}','${privacy}','${blockedUsers}','${totalFriends}','${status}')`;
-                    //     const [user] = await this.adapter.db.query(userCreate)
-                    //     if(user){
-                    //         const accountPrivacy = ctx.params.accountPrivacy || null;
-                    //         const googleId = ctx.params.googleId || null;
-                    //         const facebookId = ctx.params.facebookId;
-                    //         const instagramId = ctx.params.instagramId || null;
-                    //         const twitterId = ctx.params.twitterId || null;
-                    //         const notificationSettings = ctx.params.notificationSettings || null;
-                    //         const exportCalendarType = ctx.params.exportCalendarType || null;
-                    //         const activityCategories1 = ctx.params.activityCategories || null
-                    //         const countryMode	 = ctx.params.countryMode	 || null;
-                    //         const favouriteActivities = ctx.params.favouriteActivities || null;
-                    //         const cards = ctx.params.cards || null;
-                            
-                    //         const userPreference = `insert into user_preferences(userId,accountPrivacy,googleId,facebookId,instagramId,twitterId,notificationSettings,exportCalendarType,activityCategories,countryMode,favouriteActivities,cards) values('${user}','${accountPrivacy}','${googleId}','${facebookId}','${instagramId}','${twitterId}','${notificationSettings}','${exportCalendarType}','${activityCategories}','${countryMode}','${favouriteActivities}','${cards}')`;
-                    //         const [userPreferenceress] = await this.adapter.db.query(userPreference); 
-                    //         var token = jwt.sign({
-                    //             id: user,
-                    //             email:email,
-                    //             status: status,
-                    //             role: role
-                    //         }, 'secret', { expiresIn: '12h' });
-                    //         const userData = {
-                    //             "id":user ,
-                    //             "firstName": firstName,
-                    //             "lastName":lastName,
-                    //             "email": email,
-                    //             "gender": gender,
-                    //             "profilePic": profilePic,
-                    //             "mobileNo": mobileNo,
-                    //             "dob": dob,
-                    //             "coupleCode": coupleCode,
-                    //             "status": status,
-                    //             "user_preference": {
-                    //                 "userId": user,
-                    //                 "token": token
-                    //             }
-                    //         }
-                    //         const successMessage = {
-                    //             success:true,
-                    //             statusCode:200,
-                    //             data:userData,
-                    //             message:'Success'
-                    //         }
-                    //         return successMessage;
-                    //     }else{
-                    //         const successMessage = {
-                    //             success:false,
-                    //             status: 500,
-                    //             message:'Not save'
-                    //         }
-                    //         return successMessage;
-                    //     }
-                    // }else {
-                    //     return process.message.USERDUPLICATE;
-                    // }
                 }catch(error){
                     return error;
                 }

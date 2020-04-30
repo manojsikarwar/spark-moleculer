@@ -174,6 +174,48 @@ module.exports = {
         },
 
 
+        // activityCategoryList: {
+        //     rest: {
+		// 		method: "GET",
+		// 		path: "/activityCategoryList"
+        //     },
+        //     async handler(ctx) {
+        //         // console.log(ctx.meta)
+        //         try{
+        //             // const Auth = ctx.meta.user
+        //             // if(Auth == null){
+        //             //     return process.message.UNAUTHORIZED;
+        //             // }else{
+        //                 const List = [];
+        //                 const sql = `select * from activity_categories`
+        //                 const [searcActivityress] = await this.adapter.db.query(sql);
+        //                 for(let key of searcActivityress){
+        //                     const list = {
+        //                         id:key.id,
+        //                         name:key.name,
+        //                         images:JSON.parse(key.images)
+        //                     }
+        //                     List.push(list);
+        //                 }
+        //                 const successMessage = {
+        //                     success:true,
+        //                     status: 200,
+        //                     data: List,
+        //                     message:'Success'
+        //                 }
+        //                 if(searcActivityress == ''){
+        //                     return successMessage;
+        //                 }else{
+        //                     return successMessage;
+        //                 }
+        //             // }
+        //         }catch(error){
+        //             return error
+        //         }
+		// 	}
+        // },
+
+        
         activityCategoryList: {
             rest: {
 				method: "GET",
@@ -189,20 +231,22 @@ module.exports = {
                         const List = [];
                         const sql = `select * from activity_categories`
                         const [searcActivityress] = await this.adapter.db.query(sql);
-                        for(let key of searcActivityress){
-                            const list = {
-                                id:key.id,
-                                name:key.name,
-                                images:JSON.parse(key.images)
-                            }
-                            List.push(list);
-                        }
+                        // for(let key of searcActivityress){
+                        //     // return key
+                        //     const list = {
+                        //         id:key.id,
+                        //         name:key.name,
+                        //         images:JSON.parse(key.images)
+                        //     }
+                        //     List.push(list);
+                        // }
                         const successMessage = {
                             success:true,
                             status: 200,
-                            data: List,
+                            data: searcActivityress,
                             message:'Success'
                         }
+                        return successMessage
                         if(searcActivityress == ''){
                             return successMessage;
                         }else{
@@ -213,8 +257,7 @@ module.exports = {
                     return error
                 }
 			}
-        },
-
+        },    
 
     },
     
