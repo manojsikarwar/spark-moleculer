@@ -15,19 +15,19 @@ module.exports = function(collection) {
 	const schema = {
 		mixins: [DbService],
 
-		// events: {
-		// 	/**
-		// 	 * Subscribe to the cache clean event. If it's triggered
-		// 	 * clean the cache entries for this service.
-		// 	 *
-		// 	 * @param {Context} ctx
-		// 	 */
-		// 	async [cacheCleanEventName]() {
-		// 		if (this.broker.cacher) {
-		// 			await this.broker.cacher.clean(`${this.fullName}.*`);
-		// 		}
-		// 	}
-		// },
+		events: {
+			/**
+			 * Subscribe to the cache clean event. If it's triggered
+			 * clean the cache entries for this service.
+			 *
+			 * @param {Context} ctx
+			 */
+			async [cacheCleanEventName]() {
+				if (this.broker.cacher) {
+					await this.broker.cacher.clean(`${this.fullName}.*`);
+				}
+			}
+		},
 
 		methods: {
 			/**

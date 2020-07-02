@@ -12,7 +12,7 @@ const os = require('os');
 module.exports = {
   server: {
     host: '0.0.0.0',
-    port: process.env.SERVICE_PORT || 4000,
+    port:  4000,
   },
   metrics: {
     heartbeatInterval: Number(process.env.HEARTBEAT_INTERVAL) || 1000,
@@ -22,11 +22,18 @@ module.exports = {
   },
   mysql: {
     user: process.env.PGSQL_DB_USER || 'root',
-    password: process.env.PGSQL_DB_PASSWORD || '',
+    password: process.env.PGSQL_DB_PASSWORD || 'root',
     database: process.env.PGSQL_DB_NAME || 'spark',
-    host: process.env.PGSQL_DB_HOST || '127.0.0.1',
+    host: process.env.PGSQL_DB_HOST || 'localhost',
     // port: process.env.PGSQL_DB_PORT || 5432,
   },
-
+ 
+  // mysql: {
+  //   user: process.env.PGSQL_DB_USER || 'root',
+  //   password: process.env.PGSQL_DB_PASSWORD || 'admin',
+  //   database: process.env.PGSQL_DB_NAME || 'spark',
+  //   host: process.env.PGSQL_DB_HOST || '127.0.0.1',
+  //   // port: process.env.PGSQL_DB_PORT || 5432,
+  // },
 
 };

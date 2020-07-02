@@ -1,0 +1,39 @@
+{
+  "files": {
+    "main.css": "/static/css/main.44258bc5.chunk.css",
+    "main.js": "/static/js/main.df7c9ec2.chunk.js",
+    "main.js.map": "/static/js/main.df7c9ec2.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.87503f4d.js",
+    "runtime-main.js.map": "/static/js/runtime-main.87503f4d.js.map",
+    "static/css/2.ece44934.chunk.css": "/static/css/2.ece44934.chunk.css",
+    "static/js/2.22bbb116.chunk.js": "/static/js/2.22bbb116.chunk.js",
+    "static/js/2.22bbb116.chunk.js.map": "/static/js/2.22bbb116.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.f395db69124902a7ae01a9c3542b2e23.js": "/precache-manifest.f395db69124902a7ae01a9c3542b2e23.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.ece44934.chunk.css.map": "/static/css/2.ece44934.chunk.css.map",
+    "static/css/main.44258bc5.chunk.css.map": "/static/css/main.44258bc5.chunk.css.map",
+    "static/js/2.22bbb116.chunk.js.LICENSE.txt": "/static/js/2.22bbb116.chunk.js.LICENSE.txt",
+    "static/media/style.scss": "/static/media/slick.f97e3bbf.svg",
+    "static/media/font-awesome.scss": "/static/media/fontawesome-webfont.fee66e71.woff",
+    "static/media/img-slide-1.jpg": "/static/media/img-slide-1.1d92bbc6.jpg",
+    "static/media/img-slide-2.jpg": "/static/media/img-slide-2.5c7505e8.jpg",
+    "static/media/img-slide-3.jpg": "/static/media/img-slide-3.1809900e.jpg",
+    "static/media/img-slide-4.jpg": "/static/media/img-slide-4.8cced928.jpg",
+    "static/media/img-slide-5.jpg": "/static/media/img-slide-5.d1951c0c.jpg",
+    "static/media/img-slide-6.jpg": "/static/media/img-slide-6.fc642d28.jpg",
+    "static/media/img-slide-7.jpg": "/static/media/img-slide-7.38f0ed17.jpg",
+    "static/media/navbar-img-2.jpg": "/static/media/navbar-img-2.1b589b0f.jpg",
+    "static/media/navbar-img-3.jpg": "/static/media/navbar-img-3.569bddd6.jpg",
+    "static/media/navbar-img-4.jpg": "/static/media/navbar-img-4.cc57986b.jpg",
+    "static/media/small-logo.svg": "/static/media/small-logo.e232f438.svg",
+    "static/media/sparks-logo.svg": "/static/media/sparks-logo.295a9166.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.87503f4d.js",
+    "static/css/2.ece44934.chunk.css",
+    "static/js/2.22bbb116.chunk.js",
+    "static/css/main.44258bc5.chunk.css",
+    "static/js/main.df7c9ec2.chunk.js"
+  ]
+}
